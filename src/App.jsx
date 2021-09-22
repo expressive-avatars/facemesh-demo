@@ -26,7 +26,14 @@ export default function App() {
     loadImage("/obama.png").then((img) => {
       const worker = new Worker()
       const imageData = getImageData(img)
+      console.log("sending message")
       worker.postMessage(imageData, [imageData.data.buffer])
+
+      worker.onmessage = (e) => {
+        /** @type {import('@tensorflow-models/face-landmarks-detection').FaceLandmarksPrediction[]} */
+        const predictions = e.data
+        console.log(predictions)
+      }
     })
   }, [])
   return <p>Hello</p>
