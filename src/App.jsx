@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react"
-import { FACEMESH_TESSELATION } from "@mediapipe/face_mesh"
 import FacemeshWorker from "./worker?worker"
 
+import { FACEMESH_TESSELATION } from "./tesselation"
 import { loadImage, getImageData, drawMesh } from "./util"
 import { Webcam } from "./Webcam"
 import styles from "./App.module.css"
