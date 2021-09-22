@@ -220,6 +220,11 @@
     "@babel/helper-validator-identifier" "^7.14.9"
     to-fast-properties "^2.0.0"
 
+"@mediapipe/face_mesh@^0.4.1629159166":
+  version "0.4.1629159166"
+  resolved "https://registry.yarnpkg.com/@mediapipe/face_mesh/-/face_mesh-0.4.1629159166.tgz#93c8a1bf4b833a446747246251f6c5a436d458c4"
+  integrity sha512-zGH5bUKscUFpDs9yT9go9BJouU92omfKSINmWdSGdr308j+IbLELsqTgCyq2Y4YlLwiig3XdV+5KMidIgL9Tgg==
+
 "@rollup/pluginutils@^4.1.1":
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/@rollup/pluginutils/-/pluginutils-4.1.1.tgz#1d4da86dd4eded15656a57d933fda2b9a08d47ec"
