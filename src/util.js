@@ -11,12 +11,12 @@ export function loadImage(src) {
 const canvas = document.createElement("canvas")
 const ctx = canvas.getContext("2d")
 
-/** @type {(img: HTMLImageElement) => ImageData} */
-export function getImageData(img) {
-  canvas.width = img.width
-  canvas.height = img.height
-  ctx.drawImage(img, 0, 0)
-  return ctx.getImageData(0, 0, img.width, img.height)
+/** @type {(image: CanvasImageSource) => ImageData} */
+export function getImageData(image) {
+  canvas.width = image.width
+  canvas.height = image.height
+  ctx.drawImage(image, 0, 0)
+  return ctx.getImageData(0, 0, image.width, image.height)
 }
 
 /** @type {(ctx: CanvasRenderingContext2D, points: Array<[number, number]>, edges: Array<[number, number]>)} */

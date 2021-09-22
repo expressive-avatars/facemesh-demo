@@ -3,29 +3,48 @@ import { FACEMESH_TESSELATION } from "@mediapipe/face_mesh"
 import FacemeshWorker from "./worker?worker"
 
 import { loadImage, getImageData, drawMesh } from "./util"
+import { Webcam } from "./Webcam"
+import styles from "./App.module.css"
 
 export default function App() {
   /** @type {React.RefObject<HTMLCanvasElement>} */
-  const canvas = useRef()
-  useEffect(() => {
-    loadImage("/obama.png").then((img) => {
-      const worker = new FacemeshWorker()
-      const imageData = getImageData(img)
-      const ctx = canvas.current.getContext("2d")
-      canvas.current.width = img.width
-      canvas.current.height = img.height
-      ctx.putImageData(imageData, 0, 0)
-      console.log("sending message")
-      worker.postMessage(imageData, [imageData.data.buffer])
+  const canvasRef = useRef()
 
-      worker.onmessage = (e) => {
-        /** @type {import('@tensorflow-models/face-landmarks-detection').FaceLandmarksPrediction[]} */
-        const predictions = e.data
-        ctx.strokeStyle = "lime"
-        ctx.globalAlpha = 0.2
-        drawMesh(ctx, predictions[0].scaledMesh, FACEMESH_TESSELATION, "lime")
-      }
-    })
+  /** @type {React.RefObject<HTMLVideoElement>} */
+  const videoRef = useRef()
+
+  useEffect(() => {
+    const worker = new FacemeshWorker()
+    const video = videoRef.current
+    const ctx = canvasRef.current.getContext("2d")
+    ctx.strokeStyle = "purple"
+    ctx.globalAlpha = 0.2
+
+    const clearCanvas = () => ctx.clearRect(0, 0, 640, 480)
+    const requestUpdate = () => {
+      const imageData = getImageData(video)
+      worker.postMessage(imageData)
+    }
+    const handlePrediction = (prediction) => {
+      clearCanvas()
+      drawMesh(ctx, prediction.scaledMesh, FACEMESH_TESSELATION)
+    }
+    worker.onmessage = (e) => {
+      const predictions = e.data
+      if (predictions[0]) handlePrediction(predictions[0])
+      requestUpdate() // Recurse loop
+    }
+
+    // Start loop
+    requestUpdate()
+
+    // Cleanup
+    return () => worker.terminate()
   }, [])
-  return <canvas ref={canvas} />
+  return (
+    <div className={styles.stack}>
+      <canvas ref={canvasRef} width={640} height={480} style={{ zIndex: 1 }} />
+      <Webcam ref={videoRef} width={640} height={480} play />
+    </div>
+  )
 }
