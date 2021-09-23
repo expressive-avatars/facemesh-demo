@@ -1,52 +1,41 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import FacemeshWorker from "./worker?worker"
 
-import { FACEMESH_TESSELATION } from "./tesselation"
+import { drawConnectors } from "@mediapipe/drawing_utils"
+import { FACEMESH_TESSELATION } from "@mediapipe/face_mesh"
 import { loadImage, getImageData, drawMesh } from "./util"
 import { Webcam } from "./Webcam"
 import { FacemeshScene } from "./FacemeshScene"
 import styles from "./App.module.css"
+import { useFacemesh } from "./hooks"
+
+console.log(FACEMESH_TESSELATION)
 
 export default function App() {
-  /** @type {React.RefObject<HTMLCanvasElement>} */
-  const canvasRef = useRef()
+  const [video, setVideo] = useState()
 
-  /** @type {React.RefObject<HTMLVideoElement>} */
-  const videoRef = useRef()
-
-  useEffect(() => {
-    const worker = new FacemeshWorker()
-    const video = videoRef.current
-    const ctx = canvasRef.current.getContext("2d")
-    ctx.strokeStyle = "purple"
-    ctx.globalAlpha = 0.2
-
-    const clearCanvas = () => ctx.clearRect(0, 0, 640, 480)
-    const requestUpdate = () => {
-      const imageData = getImageData(video)
-      worker.postMessage(imageData)
+  /** @type {[CanvasRenderingContext2D, (state: CanvasRenderingContext2D) => void]} */
+  const [ctx, setCtx] = useState()
+  const canvasRef = (canvas) => {
+    if (canvas) {
+      setCtx(canvas.getContext("2d"))
     }
-    const handlePrediction = (prediction) => {
-      clearCanvas()
-      drawMesh(ctx, prediction.scaledMesh, FACEMESH_TESSELATION)
-    }
-    worker.onmessage = (e) => {
-      const predictions = e.data
-      if (predictions[0]) handlePrediction(predictions[0])
-      requestUpdate() // Recurse loop
-    }
+  }
 
-    // Start loop
-    requestUpdate()
+  useFacemesh(video, (results) => {
+    if (ctx && results.multiFaceLandmarks) {
+      ctx.clearRect(0, 0, 640, 480)
+      for (const landmarks of results.multiFaceLandmarks) {
+        drawConnectors(ctx, landmarks, FACEMESH_TESSELATION, { color: "lime", lineWidth: 0.2 })
+      }
+    }
+  })
 
-    // Cleanup
-    return () => worker.terminate()
-  }, [])
   return (
     <div className={`${styles.adjacent} ${styles.fullscreen}`}>
       <div className={styles.stack} style={{ width: 640, height: 480 }}>
         <canvas ref={canvasRef} width={640} height={480} style={{ zIndex: 1 }} />
-        <Webcam ref={videoRef} width={640} height={480} play />
+        <Webcam onStart={(v) => setVideo(v)} width={640} height={480} play />
       </div>
       <FacemeshScene />
     </div>

@@ -1,28 +1,40 @@
 import { useEffect, useState } from "react"
-import FacemeshWorker from "./worker?worker"
-import { loadImage, getImageData, drawMesh } from "./util"
+import { FaceMesh } from "@mediapipe/face_mesh"
 
-/** @type {(videoRef: React.RefObject<HTMLVideoElement>)} */
-export function useFacemesh(videoRef) {
+/**
+ * @typedef {import('@mediapipe/face_mesh').ResultsListener} ResultsListener
+ */
+
+/**
+ * @param {HTMLVideoElement} video
+ * @param {ResultsListener} onResults
+ */
+export function useFacemesh(video, onResults) {
   useEffect(() => {
-    const video = videoRef.current
-    const worker = new FacemeshWorker()
-    const requestUpdate = () => {
-      const imageData = getImageData(video)
-      worker.postMessage(imageData)
-    }
-    worker.onmessage = (e) => {
-      const predictions = e.data
-      if (predictions[0]) {
-        // TODO: send data to listeners
+    if (video) {
+      const faceMesh = new FaceMesh({
+        locateFile: (file) => {
+          return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+        },
+      })
+      faceMesh.setOptions({
+        maxNumFaces: 1,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5,
+        enableFaceGeometry: true,
+      })
+      const requestUpdate = async () => {
+        await faceMesh.send({ image: video })
       }
-      requestUpdate() // Recurse loop
+      faceMesh.onResults((results) => {
+        onResults(results)
+        requestAnimationFrame(requestUpdate) // Recurse
+      })
+
+      requestUpdate() // Begin loop
+
+      // Cleanup
+      return () => faceMesh.close()
     }
-
-    // Start loop
-    requestUpdate()
-
-    // Cleanup
-    return () => worker.terminate()
-  }, [videoRef])
+  }, [video, onResults])
 }
