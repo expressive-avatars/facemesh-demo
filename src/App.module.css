@@ -5,3 +5,21 @@
 .stack * {
   position: absolute;
 }
+
+.adjacent {
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+}
+
+.adjacent * {
+  align-self: center;
+  justify-self: center;
+}
+
+.fullscreen {
+  position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+}

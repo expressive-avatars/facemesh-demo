@@ -4,6 +4,7 @@ import FacemeshWorker from "./worker?worker"
 import { FACEMESH_TESSELATION } from "./tesselation"
 import { loadImage, getImageData, drawMesh } from "./util"
 import { Webcam } from "./Webcam"
+import { FacemeshScene } from "./FacemeshScene"
 import styles from "./App.module.css"
 
 export default function App() {
@@ -42,9 +43,12 @@ export default function App() {
     return () => worker.terminate()
   }, [])
   return (
-    <div className={styles.stack}>
-      <canvas ref={canvasRef} width={640} height={480} style={{ zIndex: 1 }} />
-      <Webcam ref={videoRef} width={640} height={480} play />
+    <div className={`${styles.adjacent} ${styles.fullscreen}`}>
+      <div className={styles.stack} style={{ width: 640, height: 480 }}>
+        <canvas ref={canvasRef} width={640} height={480} style={{ zIndex: 1 }} />
+        <Webcam ref={videoRef} width={640} height={480} play />
+      </div>
+      <FacemeshScene />
     </div>
   )
 }
