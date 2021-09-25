@@ -9,8 +9,6 @@ import { FacemeshScene } from "./FacemeshScene"
 import styles from "./App.module.css"
 import { useFacemesh } from "./hooks"
 
-console.log(FACEMESH_TESSELATION)
-
 export default function App() {
   const [video, setVideo] = useState()
 

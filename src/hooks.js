@@ -10,13 +10,16 @@ import { FaceMesh } from "@mediapipe/face_mesh"
  * @param {ResultsListener} onResults
  */
 export function useFacemesh(video, onResults) {
+  const [faceMesh] = useState(() => {
+    return new FaceMesh({
+      locateFile: (file) => {
+        return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+      },
+    })
+  })
+
   useEffect(() => {
     if (video) {
-      const faceMesh = new FaceMesh({
-        locateFile: (file) => {
-          return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
-        },
-      })
       faceMesh.setOptions({
         maxNumFaces: 1,
         minDetectionConfidence: 0.5,
@@ -26,15 +29,13 @@ export function useFacemesh(video, onResults) {
       const requestUpdate = async () => {
         await faceMesh.send({ image: video })
       }
+      let rafHandler
       faceMesh.onResults((results) => {
         onResults(results)
-        requestAnimationFrame(requestUpdate) // Recurse
+        rafHandler = requestAnimationFrame(requestUpdate) // Recurse
       })
-
       requestUpdate() // Begin loop
-
-      // Cleanup
-      return () => faceMesh.close()
+      return () => cancelAnimationFrame(rafHandler)
     }
   }, [video, onResults])
 }
