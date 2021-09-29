@@ -1,12 +1,8 @@
-import { useEffect, useRef, useState } from "react"
-import FacemeshWorker from "./worker?worker"
-
+import { useState } from "react"
 import { drawConnectors } from "@mediapipe/drawing_utils"
 import { FACEMESH_TESSELATION } from "@mediapipe/face_mesh"
-import { loadImage, getImageData, drawMesh } from "./util"
 import { Webcam } from "./Webcam"
 import { FacemeshScene } from "./FacemeshScene"
-import styles from "./App.module.css"
 import { useFacemesh } from "./hooks"
 
 export default function App() {
@@ -30,8 +26,8 @@ export default function App() {
   })
 
   return (
-    <div className={`${styles.adjacent} ${styles.fullscreen}`}>
-      <div className={styles.stack} style={{ width: 640, height: 480 }}>
+    <div tw="w-screen h-screen grid auto-cols-fr auto-rows-fr grid-flow(row lg:col) place-items-center">
+      <div tw="w-full h-full grid place-items-center relative children:(absolute)">
         <canvas ref={canvasRef} width={640} height={480} style={{ zIndex: 1 }} />
         <Webcam onStart={(v) => setVideo(v)} width={640} height={480} play />
       </div>
