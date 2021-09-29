@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { drawConnectors } from "@mediapipe/drawing_utils"
 import { FACEMESH_TESSELATION } from "@mediapipe/face_mesh"
 import { Webcam } from "./Webcam"
@@ -16,14 +16,20 @@ export default function App() {
     }
   }
 
+  const landmarksRef = useRef()
+  const geometryRef = useRef()
+
   useFacemesh(video, (results) => {
     if (ctx && results.multiFaceLandmarks) {
       ctx.clearRect(0, 0, 640, 480)
-      for (const landmarks of results.multiFaceLandmarks) {
-        drawConnectors(ctx, landmarks, FACEMESH_TESSELATION, { color: "lime", lineWidth: 0.2 })
-      }
+      const landmarks = results.multiFaceLandmarks[0]
+      const geometry = results.multiFaceGeometry[0]
+      geometryRef.current = geometry
+      drawConnectors(ctx, landmarks, FACEMESH_TESSELATION, { color: "lime", lineWidth: 0.2 })
     }
   })
+
+  console.log(geometryRef)
 
   return (
     <div tw="w-screen h-screen grid auto-cols-fr auto-rows-fr grid-flow(row lg:col) place-items-center">
@@ -31,7 +37,7 @@ export default function App() {
         <canvas ref={canvasRef} width={640} height={480} style={{ zIndex: 1 }} />
         <Webcam onStart={(v) => setVideo(v)} width={640} height={480} play />
       </div>
-      <FacemeshScene />
+      <FacemeshScene faceGeometry={geometryRef} />
     </div>
   )
 }
