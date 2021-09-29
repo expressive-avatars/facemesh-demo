@@ -16,7 +16,6 @@ export default function App() {
     }
   }
 
-  const landmarksRef = useRef()
   const geometryRef = useRef()
 
   useFacemesh(video, (results) => {
@@ -28,8 +27,6 @@ export default function App() {
       drawConnectors(ctx, landmarks, FACEMESH_TESSELATION, { color: "lime", lineWidth: 0.2 })
     }
   })
-
-  console.log(geometryRef)
 
   return (
     <div tw="w-screen h-screen grid auto-cols-fr auto-rows-fr grid-flow(row lg:col) place-items-center">

@@ -1,13 +1,12 @@
-import { useRef } from "react"
+import { useMemo, useRef, useState } from "react"
 import { Canvas, useFrame } from "@react-three/fiber"
 import { Stats, OrbitControls, Box } from "@react-three/drei"
 import * as THREE from "three"
 
 export function FacemeshScene({ faceGeometry }) {
   return (
-    <Canvas>
+    <Canvas tw="bg-gradient-to-br from-blue-200 to-blue-600">
       <Stats />
-      <color attach="background" args={["black"]} />
       <OrbitControls />
       <Facemesh faceGeometry={faceGeometry} />
     </Canvas>
@@ -27,16 +26,36 @@ const poseMatrix = new THREE.Matrix4()
  */
 function Facemesh({ faceGeometry }) {
   /** @type {React.RefObject<THREE.Mesh>} */
-  const box = useRef()
+  const root = useRef()
+
+  const { geometry, interleaved } = useMemo(() => {
+    /**
+     * Each vertex has 5 values (x, y, z, u, v) {@link FaceGeometry}
+     */
+    const interleaved = new THREE.InterleavedBuffer(new Float32Array(5 * 468), 5)
+    const position = new THREE.InterleavedBufferAttribute(interleaved, 3, 0)
+    const uv = new THREE.InterleavedBufferAttribute(interleaved, 2, 3)
+    const geometry = new THREE.BufferGeometry()
+    geometry.setAttribute("position", position)
+    geometry.setAttribute("uv", uv)
+    return { geometry, interleaved }
+  }, [])
+
   useFrame(() => {
     if (faceGeometry.current) {
+      const mesh = faceGeometry.current.getMesh()
+      const vbl = mesh.getVertexBufferList()
+      interleaved.set(vbl)
+      interleaved.needsUpdate = true
       poseMatrix.fromArray(faceGeometry.current.getPoseTransformMatrix().getPackedDataList())
-      box.current.matrix.extractRotation(poseMatrix)
+      root.current.matrix.copy(poseMatrix)
     }
   })
   return (
-    <Box ref={box} matrixAutoUpdate={false}>
-      <meshNormalMaterial />
-    </Box>
+    <group position-z={40}>
+      <points ref={root} args={[geometry]} matrixAutoUpdate={false}>
+        <pointsMaterial color="red" size={0.2} />
+      </points>
+    </group>
   )
 }
