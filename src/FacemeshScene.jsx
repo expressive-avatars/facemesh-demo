@@ -1,7 +1,7 @@
+import { useRef } from "react"
 import { Canvas, useFrame } from "@react-three/fiber"
 import { Stats, OrbitControls, Box } from "@react-three/drei"
 import * as THREE from "three"
-import { useRef } from "react"
 
 export function FacemeshScene({ faceGeometry }) {
   return (
@@ -13,6 +13,8 @@ export function FacemeshScene({ faceGeometry }) {
     </Canvas>
   )
 }
+
+const poseMatrix = new THREE.Matrix4()
 
 /**
  * @typedef {import("@mediapipe/face_mesh").NormalizedLandmarkList} NormalizedLandmarkList
@@ -28,12 +30,12 @@ function Facemesh({ faceGeometry }) {
   const box = useRef()
   useFrame(() => {
     if (faceGeometry.current) {
-      const matrix = faceGeometry.current.getPoseTransformMatrix()
-      box.current.matrix.fromArray(matrix.getPackedDataList())
+      poseMatrix.fromArray(faceGeometry.current.getPoseTransformMatrix().getPackedDataList())
+      box.current.matrix.extractRotation(poseMatrix)
     }
   })
   return (
-    <Box ref={box} matrixAutoUpdate={false} args={[10, 10, 10]}>
+    <Box ref={box} matrixAutoUpdate={false}>
       <meshNormalMaterial />
     </Box>
   )
