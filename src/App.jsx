@@ -29,12 +29,14 @@ export default function App() {
   })
 
   return (
-    <div tw="w-screen h-screen grid auto-cols-fr auto-rows-fr grid-flow(row lg:col) place-items-center">
-      <div tw="w-full h-full grid place-items-center relative children:(absolute)">
-        <canvas ref={canvasRef} width={640} height={480} style={{ zIndex: 1 }} />
-        <Webcam onStart={(v) => setVideo(v)} width={640} height={480} play />
-      </div>
+    <div tw="w-screen h-screen">
       <FacemeshScene faceGeometry={geometryRef} />
+      <div tw="fixed top-0 right-0 scale-[50%] origin-top-right">
+        <div tw="w-[640px] h-[480px] relative grid place-items-center children:(absolute)">
+          <canvas ref={canvasRef} width={640} height={480} style={{ zIndex: 1 }} />
+          <Webcam onStart={(v) => setVideo(v)} width={640} height={480} play />
+        </div>
+      </div>
     </div>
   )
 }
